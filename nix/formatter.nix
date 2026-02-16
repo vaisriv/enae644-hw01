@@ -19,14 +19,4 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
             ];
         };
     };
-
-    # python
-    programs = {
-        black.enable = true;
-    };
-
-    # latex
-    programs = {
-        latexindent.enable = true;
-    };
 }
