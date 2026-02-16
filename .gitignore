@@ -13,7 +13,3 @@
 .direnv
 result
 result-*
-
-# ignore latex aux/sync files
-**/.texaux
-**/*.synctex.gz
