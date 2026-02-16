@@ -15,8 +15,18 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
         alejandra = {
             options = [
                 "--experimental-config"
-                "./.nix/fmt/alejandra.toml"
+                "./nix/fmt/alejandra.toml"
             ];
         };
+    };
+
+    # python
+    programs = {
+        black.enable = true;
+    };
+
+    # haskell
+    programs = {
+        cabal-fmt.enable = true;
     };
 }

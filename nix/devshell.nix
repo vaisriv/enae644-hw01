@@ -14,5 +14,18 @@ perSystem.devshell.mkShell {
     ];
 
     packages = with pkgs; [
+        # python
+        (python3.withPackages (ps:
+            with ps; [
+                # python packages here
+                matplotlib
+                numpy
+            ]))
+
+        # haskell
+        (ghc.withPackages (hsPkgs:
+            with hsPkgs; [
+                pqueue
+            ]))
     ];
 }
