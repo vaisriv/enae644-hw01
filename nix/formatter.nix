@@ -27,6 +27,6 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
 
     # haskell
     programs = {
-        cabal-fmt.enable = true;
+        ormolu.enable = true;
     };
 }
