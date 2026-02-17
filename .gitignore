@@ -5,11 +5,40 @@
 # *.[oa]
 # *~
 
-# ignore python venvs
-**/.venv
-**/__pycache__
-
 # ignore nix artifacts
 .direnv
 result
 result-*
+
+# python
+.ipynb_checkpoints
+*$py.class
+*.py[codz]
+**/__pycache__
+*.so
+**/.venv
+
+# haskell
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.hie
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.HTF/
+.ghc.environment.*
