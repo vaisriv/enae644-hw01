@@ -23,9 +23,14 @@ perSystem.devshell.mkShell {
             ]))
 
         # haskell
-        (ghc.withPackages (hsPkgs:
-            with hsPkgs; [
-                pqueue
-            ]))
+        # (ghc.withPackages (hsPkgs:
+        #     with hsPkgs; [
+        #         pqueue
+        #     ]))
+
+        # cabal2nix
+        ghc
+        cabal-install
+        haskell-language-server
     ];
 }
