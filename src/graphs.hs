@@ -2,6 +2,7 @@ module Graphs
   ( Graph (..),
     Node (..),
     Edge (..),
+    AStarResult (..),
     readGraph,
     printGraph,
     astar,
@@ -11,10 +12,9 @@ where
 import Data.Char (isSpace)
 import Data.Heap (Entry (..))
 import qualified Data.Heap as Heap
-import Data.List (intercalate)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Maybe (fromMaybe)
 import System.FilePath ((</>))
 
 -- graph structures
@@ -37,6 +37,14 @@ data Graph = Graph
     edges :: [Edge]
   }
   deriving (Show)
+
+-- result of a successful A* search
+--   'pathNodes' – nodes from goal (top) to start (bottom), goal-first order
+--   'searchTreeEdges' – every (child, parent) pair that A* ever relaxed
+data AStarResult = AStarResult
+  { pathNodes :: [Node], -- goal first, start last
+    searchTreeEdges :: [(Node, Node)] -- (child, parent) pairs
+  }
 
 -- graph IO
 readGraph :: FilePath -> Bool -> IO Graph
@@ -78,7 +86,7 @@ printGraph graph = do
     weightStr Nothing = ""
     weightStr (Just w) = " (weight: " ++ show w ++ ")"
 
--- parsing
+-- node/edge parsing
 parseRow :: String -> [String]
 parseRow = map trim . splitOn ','
   where
@@ -108,11 +116,11 @@ parseEdges weighted content =
   where
     parseEdge line
       | weighted =
-          let [startStr, endStr, weightStr] = parseRow line
+          let [startStr, endStr, wStr] = parseRow line
            in Edge
                 { startNode = read startStr,
                   endNode = read endStr,
-                  weight = Just (read weightStr)
+                  weight = Just (read wStr)
                 }
       | otherwise =
           let [startStr, endStr] = parseRow line
@@ -122,22 +130,16 @@ parseEdges weighted content =
                   weight = Nothing
                 }
 
--- A*
--- euclidean distance heuristic between two nodes
+-- the A* algorithm
 heuristic :: Node -> Node -> Float
 heuristic a b =
   let dx = xCoord a - xCoord b
       dy = yCoord a - yCoord b
    in sqrt (dx * dx + dy * dy)
 
--- look up a node by ID
-nodeByID :: Graph -> Int -> Node
-nodeByID g nid =
-  case filter (\n -> nodeID n == nid) (nodes g) of
-    (n : _) -> n
-    [] -> error $ "Node " ++ show nid ++ " not found in graph"
+buildNodeMap :: Graph -> Map Int Node
+buildNodeMap g = Map.fromList [(nodeID n, n) | n <- nodes g]
 
--- build adjacency map
 buildAdjacency :: Graph -> Map Int [(Int, Float)]
 buildAdjacency g = foldr addEdge Map.empty (edges g)
   where
@@ -147,47 +149,60 @@ buildAdjacency g = foldr addEdge Map.empty (edges g)
           dst = endNode e
        in Map.insertWith (++) src [(dst, w)] acc
 
--- run A* on the graph from startID to goalID.
--- returns Just (cost, path) on success, Nothing if no path exists
--- `path` is the list of node IDs from start to goal, inclusive
-astar :: Graph -> Int -> Int -> Maybe (Float, [Int])
-astar g startID goalID = go initOpen initCostSoFar initCameFrom
+-- run A* on the graph [startID->goalID]
+-- returns Just AStarResult on success, Nothing if no path exists
+astar :: Graph -> Int -> Int -> Maybe AStarResult
+astar g startID goalID = go initOpen initCostSoFar initCameFrom []
   where
+    nodeMap = buildNodeMap g
     adjacency = buildAdjacency g
-    goalNode = nodeByID g goalID
 
-    -- each heap entry: priority = f = g + h, payload = current nodeID
-    initH = heuristic (nodeByID g startID) goalNode
-    initOpen = Heap.singleton (Entry initH startID)
+    lookupNode nid =
+      case Map.lookup nid nodeMap of
+        Just n -> n
+        Nothing -> error $ "Node " ++ show nid ++ " not found in graph"
+
+    goalNode = lookupNode goalID
+    startNode = lookupNode startID
+
+    initOpen = Heap.singleton (Entry (heuristic startNode goalNode) startID)
     initCostSoFar = Map.singleton startID 0.0
     initCameFrom = Map.empty :: Map Int Int
 
-    go open costSoFar cameFrom
-      | Heap.null open = Nothing -- exhausted without reaching goal
+    go open costSoFar cameFrom treeAcc
+      | Heap.null open = Nothing
       | otherwise =
           let Entry _ current = Heap.minimum open
               open' = Heap.deleteMin open
            in if current == goalID
-                then Just (costSoFar Map.! goalID, reconstructPath cameFrom goalID)
+                then
+                  Just $
+                    AStarResult
+                      { pathNodes = reconstructPath cameFrom goalID,
+                        searchTreeEdges = treeAcc
+                      }
                 else
                   let neighbours = fromMaybe [] (Map.lookup current adjacency)
-                      (open'', costSoFar', cameFrom') =
-                        foldr (relax current) (open', costSoFar, cameFrom) neighbours
-                   in go open'' costSoFar' cameFrom'
+                      (open'', costSoFar', cameFrom', treeAcc') =
+                        foldr (relax current) (open', costSoFar, cameFrom, treeAcc) neighbours
+                   in go open'' costSoFar' cameFrom' treeAcc'
 
-    relax current (nbr, w) (openAcc, costAcc, cameAcc) =
+    relax current (nbr, w) (openAcc, costAcc, cameAcc, treeAcc) =
       let tentative = (costAcc Map.! current) + w
        in case Map.lookup nbr costAcc of
-            Just existing | existing <= tentative -> (openAcc, costAcc, cameAcc)
+            Just existing | existing <= tentative -> (openAcc, costAcc, cameAcc, treeAcc)
             _ ->
-              let h = heuristic (nodeByID g nbr) goalNode
+              let h = heuristic (lookupNode nbr) goalNode
                   f = tentative + h
-                  openAcc' = Heap.insert (Entry f nbr) openAcc
-                  costAcc' = Map.insert nbr tentative costAcc
-                  cameAcc' = Map.insert nbr current cameAcc
-               in (openAcc', costAcc', cameAcc')
+               in ( Heap.insert (Entry f nbr) openAcc,
+                    Map.insert nbr tentative costAcc,
+                    Map.insert nbr current cameAcc,
+                    (lookupNode nbr, lookupNode current) : treeAcc
+                  )
 
+    -- reconstructs path with goal first, start last
     reconstructPath cameFrom nid =
-      case Map.lookup nid cameFrom of
-        Nothing -> [nid]
-        Just parent -> reconstructPath cameFrom parent ++ [nid]
+      let node = lookupNode nid
+       in case Map.lookup nid cameFrom of
+            Nothing -> [node]
+            Just parent -> node : reconstructPath cameFrom parent

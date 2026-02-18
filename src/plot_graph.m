@@ -20,11 +20,11 @@
 % each edges is given by ID_start, ID_end, edgeLength 
 
 
-nodeFile = 'nodes.txt';
-edgeFile = 'edges.txt';
+nodeFile = '../data/graphs/01/nodes.txt';
+edgeFile = '../data/graphs/01/edges_with_costs.txt';
 
 startNodeID = 7;
-goalNodeID = 6;
+goalNodeID = 8;
 
 nodes = csvread(nodeFile);
 edges = csvread(edgeFile);

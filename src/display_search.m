@@ -10,10 +10,13 @@
 % assuming that the files have been generated
 
 
-search_tree_raw = csvread('search_tree.txt');
-path_raw = csvread('output_path.txt');
-nodes_raw = csvread('nodes.txt');
-edges_raw = csvread('edges.txt');
+search_tree_raw = csvread('../outputs/text/01/search_tree.csv', 1);
+path_raw = csvread('../outputs/text/01/output_path.csv', 1);
+nodes_raw = csvread('../data/graphs/01/nodes.txt');
+edges_raw = csvread('../data/graphs/01/edges_with_costs.txt');
+
+startNodeID = 7;
+goalNodeID = 8;
 
 % a bit of data processing for faster plotting
 search_tree = nan(3*size(search_tree_raw, 1), 2);
@@ -40,6 +43,8 @@ hold on
 plot(edges(:,1), edges(:,2), 'k')
 plot(search_tree(:, 1), search_tree(:, 2), 'm', 'LineWidth', 2);
 plot(path_raw(:,2), path_raw(:,3), 'g:', 'LineWidth', 3);
+plot(nodes_raw(startNodeID+1,2) , nodes_raw(startNodeID+1,3), 'or', 'markersize', 10, 'linewidth', 2)
+plot(nodes_raw(goalNodeID+1,2) , nodes_raw(goalNodeID+1,3), 'xr', 'markersize', 10, 'linewidth', 2)
 hold off
 
 
