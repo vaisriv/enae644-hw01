@@ -20,11 +20,6 @@ inputs.treefmt-nix.lib.mkWrapper pkgs {
         };
     };
 
-    # python
-    programs = {
-        black.enable = true;
-    };
-
     # haskell
     programs = {
         ormolu.enable = true;

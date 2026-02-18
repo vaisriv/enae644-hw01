@@ -10,25 +10,10 @@ perSystem.devshell.mkShell {
         $(type -p menu &>/dev/null && menu)
     '';
 
-    commands = [
-    ];
+    commands = [];
 
     packages = with pkgs; [
-        # python
-        (python3.withPackages (ps:
-            with ps; [
-                # python packages here
-                matplotlib
-                numpy
-            ]))
-
         # haskell
-        # (ghc.withPackages (hsPkgs:
-        #     with hsPkgs; [
-        #         pqueue
-        #     ]))
-
-        # cabal2nix
         ghc
         cabal-install
         haskell-language-server

@@ -10,14 +10,6 @@
 result
 result-*
 
-# python
-.ipynb_checkpoints
-*$py.class
-*.py[codz]
-**/__pycache__
-*.so
-**/.venv
-
 # haskell
 dist
 dist-*
