@@ -150,8 +150,9 @@ buildAdjacency g = foldr addEdge Map.empty (edges g)
        in Map.insertWith (++) src [(dst, w)] acc
 
 -- run A* on the graph [startID->goalID]
--- returns Just AStarResult on success, Nothing if no path exists
-astar :: Graph -> Int -> Int -> Maybe AStarResult
+-- NOTE: always returns the search tree
+-- path is Just [nodes] on success, Nothing if no path exists
+astar :: Graph -> Int -> Int -> (Maybe AStarResult, [(Node, Node)])
 astar g startID goalID = go initOpen initCostSoFar initCameFrom []
   where
     nodeMap = buildNodeMap g
@@ -170,17 +171,19 @@ astar g startID goalID = go initOpen initCostSoFar initCameFrom []
     initCameFrom = Map.empty :: Map Int Int
 
     go open costSoFar cameFrom treeAcc
-      | Heap.null open = Nothing
+      | Heap.null open = (Nothing, treeAcc)
       | otherwise =
           let Entry _ current = Heap.minimum open
               open' = Heap.deleteMin open
            in if current == goalID
                 then
-                  Just $
-                    AStarResult
-                      { pathNodes = reconstructPath cameFrom goalID,
-                        searchTreeEdges = treeAcc
-                      }
+                  ( Just $
+                      AStarResult
+                        { pathNodes = reconstructPath cameFrom goalID,
+                          searchTreeEdges = treeAcc
+                        },
+                    treeAcc
+                  )
                 else
                   let neighbours = fromMaybe [] (Map.lookup current adjacency)
                       (open'', costSoFar', cameFrom', treeAcc') =

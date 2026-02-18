@@ -27,15 +27,18 @@ main = do
       ++ show (startID args)
       ++ " to node "
       ++ show (goalID args)
-  case Graphs.astar graph (startID args) (goalID args) of
-    Nothing -> putStrLn "No path found."
-    Just result -> do
-      let cost = pathCost result
+  let (result, treeEdges) = Graphs.astar graph (startID args) (goalID args)
+  createDirectoryIfMissing True (outputPath args)
+  writeSearchTree (outputPath args </> "search_tree.csv") treeEdges
+  case result of
+    Nothing -> do
+      putStrLn "No path found."
+      putStrLn $ "Search tree written to " ++ outputPath args
+    Just r -> do
+      let cost = pathCost r
       putStrLn $ "Path found (cost: " ++ show cost ++ "):"
-      putStrLn $ "  " ++ unwords (map (show . Graphs.nodeID) (Graphs.pathNodes result))
-      createDirectoryIfMissing True (outputPath args)
-      writePathCSV (outputPath args </> "output_path.csv") (Graphs.pathNodes result)
-      writeSearchTree (outputPath args </> "search_tree.csv") (Graphs.searchTreeEdges result)
+      putStrLn $ "  " ++ unwords (map (show . Graphs.nodeID) (Graphs.pathNodes r))
+      writePathCSV (outputPath args </> "output_path.csv") (Graphs.pathNodes r)
       putStrLn $ "Results written to " ++ outputPath args
 
 -- sum edge weights along the path
