@@ -83,8 +83,8 @@ int main()
 //  G.printGraph();
 
   // we want to find a path that goes from here to here
-  int startNodeIndex = 1;
-  int goalNodeIndex = 100;
+  int startNodeIndex = 6;
+  int goalNodeIndex = 5;
 
 
   Heap<Node> H(100); // this is the heap (start's with space for 100 items
