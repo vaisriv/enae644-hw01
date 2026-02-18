@@ -5,7 +5,7 @@ pkgs.stdenv.mkDerivation {
     src = ./.;
     isLibrary = false;
     isExecutable = true;
-    executableHaskellDepends = with pkgs.haskellPackages; [base pqueue];
+    executableHaskellDepends = with pkgs.haskellPackages; [base heaps];
     mainProgram = "enae644-hw01";
 
     meta = {

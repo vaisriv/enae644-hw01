@@ -1,6 +1,6 @@
 module Main where
 
-import qualified Graphs (Graph, printGraph, readGraph)
+import qualified Graphs (Graph, astar, printGraph, readGraph)
 import qualified System.Environment
 import qualified System.Exit
 
@@ -16,8 +16,17 @@ main = do
   args <- System.Environment.getArgs >>= parse
   graph <- Graphs.readGraph (graphPath args) (weighted args)
   Graphs.printGraph graph
-  putStrLn $ "Start node: " ++ show (startID args)
-  putStrLn $ "Goal node:  " ++ show (goalID args)
+  putStrLn ""
+  putStrLn $
+    "Searching from node "
+      ++ show (startID args)
+      ++ " to node "
+      ++ show (goalID args)
+  case Graphs.astar graph (startID args) (goalID args) of
+    Nothing -> putStrLn "No path found."
+    Just (cost, path) -> do
+      putStrLn $ "Path found (cost: " ++ show cost ++ "):"
+      putStrLn $ "  " ++ unwords (map show path)
 
 parse :: [String] -> IO Args
 parse ["-h"] = usage >> exit >> return (Args "" False 0 0)
@@ -28,7 +37,7 @@ parse [] = putStrLn "No input provided." >> die >> return (Args "" False 0 0)
 parse _ = putStrLn "Usage error." >> die >> return (Args "" False 0 0)
 
 usage :: IO ()
-usage = putStrLn "Usage: enae644-hw01 [-hvw] [graphpath] [start] [goal]"
+usage = putStrLn "Usage: enae644-hw01 [-vhw] [graphpath] [start] [goal]"
 
 version :: IO ()
 version = putStrLn "Haskell enae644-hw01 0.1"

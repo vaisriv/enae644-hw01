@@ -74,7 +74,8 @@ executable enae644-hw01
     build-depends:
         base ^>=4.20.2.0,
         filepath ^>=1.5.4.0,
-        pqueue ^>=1.5.0.0
+        heaps ^>=0.4.1,
+        containers ^>=0.7
 
     -- Directories containing source files.
     hs-source-dirs:   src
