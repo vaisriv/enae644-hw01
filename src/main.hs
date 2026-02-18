@@ -1,24 +1,24 @@
 module Main where
 
-import qualified Palindrome (isPalindrome)
+import qualified Graphs (Graph, printGraph, readGraph)
 import qualified System.Environment
 import qualified System.Exit
 
 main = do
-  text <- System.Environment.getArgs >>= parse
-  let response =
-        if Palindrome.isPalindrome text
-          then "it is"
-          else "it is not"
-  putStrLn response
+  (graphpath, weighted) <- System.Environment.getArgs >>= parse
+  graph <- Graphs.readGraph graphpath weighted
+  Graphs.printGraph graph
 
-parse ["-h"] = usage >> exit
-parse ["-v"] = version >> exit
-parse [text] = return text
-parse [] = putStrLn "No input provided." >> die >> return ""
-parse _ = putStrLn "Too many arguments." >> die >> return ""
+parse :: [String] -> IO (FilePath, Bool)
+parse ["-h"] = usage >> exit >> return ("", False)
+parse ["-v"] = version >> exit >> return ("", False)
+parse [graphpath] = return (graphpath, False)
+parse ["-w", graphpath] = return (graphpath, True)
+parse [graphpath, "-w"] = return (graphpath, True)
+parse [] = putStrLn "No input provided." >> die >> return ("", False)
+parse _ = putStrLn "Too many arguments." >> die >> return ("", False)
 
-usage = putStrLn "Usage: enae644-hw01 [-vh] [text ..]"
+usage = putStrLn "Usage: enae644-hw01 [-vhw] [graphpath ..]"
 
 version = putStrLn "Haskell enae644-hw01 0.1"
 
