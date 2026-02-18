@@ -1,11 +1,11 @@
-{ pkgs }:
+{pkgs}:
 pkgs.stdenv.mkDerivation {
     pname = "enae644-hw01";
     version = "0.1.0.0";
     src = ./.;
     isLibrary = false;
     isExecutable = true;
-    executableHaskellDepends = with pkgs.haskellPackages; [ base ];
+    executableHaskellDepends = with pkgs.haskellPackages; [base];
     mainProgram = "enae644-hw01";
 
     meta = {
@@ -13,6 +13,6 @@ pkgs.stdenv.mkDerivation {
         changelog = "https://github.com/vaisriv/enae644-hw01/blob/main/CHANGELOG.md";
 
         license = pkgs.lib.licenses.mit;
-        maintainers = with pkgs.lib.maintainers; [ vaisriv ];
+        maintainers = with pkgs.lib.maintainers; [vaisriv];
     };
 }

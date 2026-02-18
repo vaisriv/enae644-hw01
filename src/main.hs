@@ -1,12 +1,27 @@
 module Main where
-import qualified Palindrome
 
-main :: IO ()
+import qualified Palindrome (isPalindrome)
+import qualified System.Environment
+import qualified System.Exit
+
 main = do
-  putStrLn "enter a word, and i'll let you know if it is a palindrome"
-  text <- getLine
+  text <- System.Environment.getArgs >>= parse
   let response =
         if Palindrome.isPalindrome text
-          then "it is!"
-          else "it is not!"
+          then "it is"
+          else "it is not"
   putStrLn response
+
+parse ["-h"] = usage >> exit
+parse ["-v"] = version >> exit
+parse [text] = return text
+parse [] = putStrLn "No input provided." >> die >> return ""
+parse _ = putStrLn "Too many arguments." >> die >> return ""
+
+usage = putStrLn "Usage: enae644-hw01 [-vh] [text ..]"
+
+version = putStrLn "Haskell enae644-hw01 0.1"
+
+exit = System.Exit.exitWith System.Exit.ExitSuccess
+
+die = System.Exit.exitWith (System.Exit.ExitFailure 1)
