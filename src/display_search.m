@@ -10,8 +10,8 @@
 % assuming that the files have been generated
 
 
-search_tree_raw = csvread('../outputs/text/01/search_tree.csv', 1);
-path_raw = csvread('../outputs/text/01/output_path.csv', 1);
+search_tree_raw = csvread('../outputs/01/search_tree.csv', 1);
+path_raw = csvread('../outputs/01/output_path.csv', 1);
 nodes_raw = csvread('../data/graphs/01/nodes.txt');
 edges_raw = csvread('../data/graphs/01/edges_with_costs.txt');
 
